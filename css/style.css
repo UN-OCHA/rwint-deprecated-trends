@@ -168,6 +168,9 @@ h3.section-header {
   left: 0;
   width: 100%;
 }
+#map .layer-map {
+  height: 100%;
+}
 #map .country {
   stroke: none;
 }
