@@ -126,13 +126,13 @@
           field: 'status',
           value: ['to-review', 'published', 'expired', 'current', 'past'],
           operator: 'OR'
-        },
+        }/*,
         {
           field: 'date',
           value: {
             from: Date.UTC(1996, 1, 0, 0, 0, 0, 0)
           }
-        }
+        }*/
       ],
       operator: 'AND'
     },
