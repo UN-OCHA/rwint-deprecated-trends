@@ -43,7 +43,7 @@
       facets: facets
     }
 
-    var url = 'http://api.rwlabs.org/v0/report/list';
+    var url = 'http://v0.api.rwlabs.org/v0/report/list';
 
     d3.xhr(url).post(JSON.stringify(params), function(error, xhr) {
       var data = JSON.parse(xhr.responseText);
