@@ -1,6 +1,6 @@
 (function() {
   var rwapi = window.rwapi = {
-    base: 'http://api.rwlabs.org/v0/',
+    base: 'http://v0.api.rwlabs.org/v0/',
     countries: function() {
       return this.base + 'country/list?' + this.serialize({
         limit: 300,
