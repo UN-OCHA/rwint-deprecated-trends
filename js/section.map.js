@@ -5,13 +5,14 @@
   }
 
   window.sections.map = function (id) {
+    // Display the tooltip popup when hovering a country.
     function showLabel() {
       var target = d3.select(d3.event.target);
       if (target.classed('country')) {
         var data = target.datum().properties,
             name = data.name,
             iso3 = data.iso3,
-            values = indexes.map(function (i) {
+            values = resources.map(function (i) {
               return '<i class="icon-' + i + '"></i>' + formatter(stats[i].getValue(iso3));
             }).join('');
 
@@ -23,10 +24,12 @@
       }
     }
 
+    // Hide the country tooltip.
     function hideLabel() {
       label.style('display', 'none');
     }
 
+    // Move the currently displayed tooltip when the mouse moves.
     function moveLabel() {
       var position = d3.mouse(container.node()),
           x = position[0],
@@ -41,6 +44,7 @@
           });
     }
 
+    // Add a year selector for the displayed data.
     function addYearSelector() {
       var control = layerControl.select('.top.right').append('div')
           .attr('class', 'control year selector');
@@ -57,29 +61,32 @@
           }).join(''));
     }
 
-    function addIndexSelector() {
+    // Add a resource selector to change the displayed data.
+    function addResourceSelector() {
       layerControl.select('.top.right').append('div')
-          .attr('class', 'control index selector')
-          .html(indexes.map(function(i) {
-            var checked = (i === activeIndex ? ' checked="checked"' : '');
+          .attr('class', 'control resource selector')
+          .html(resources.map(function(i) {
+            var checked = (i === activeResource ? ' checked="checked"' : '');
             return '<input type="radio" name="selection" id="selector-' + i + '" value="' + i + '" ' + checked + '/>' +
                    '<label for="selector-' + i + '"><i class="icon-' + i + '"></i>' + i + '</label>';
           }).join('<br/>'))
           .on('click', function() {
             var target = d3.event.target;
             if (target.name === 'selection') {
-              activeIndex = target.value;
+              activeResource = target.value;
               updateMap(true);
             }
           });
     }
 
+    // Add the legend with the scale for the currently displayed data.
     function addLegend() {
       layerControl.select('.top.right').append('div')
           .attr('class', 'control legend');
     }
 
-    function updateLegend(index) {
+    // Update the legend when the displayed data changes.
+    function updateLegend(resource) {
       var color = getCurrentStats().color,
           domain = color.domain().slice(0);
 
@@ -99,6 +106,7 @@
       layerControl.select('.control.legend').html(html);
     }
 
+    // Add the zoom control.
     function addZoom() {
       var control = layerControl.select('.top.left').append('div')
           .attr('class', 'control zoom');
@@ -106,14 +114,15 @@
       control.append('a')
           .attr('class', 'zoom-in')
           .html('+')
-          .on('click', function () { handleZoom(2); });
+          .on('click', function () { handleZoom(0, 0, 2); });
 
       control.append('a')
           .attr('class', 'zoom-out')
           .html('-')
-          .on('click', function () { handleZoom(0.5); });
+          .on('click', function () { handleZoom(0, 0, 0.5); });
     }
 
+    // Create the zoom controller.
     function createZoom(bbox, width, height) {
       var matrix = [1, 0, 0, 1, 0, 0],
           ctm = svgContainer.node().getScreenCTM(),
@@ -121,12 +130,15 @@
           w = d3.select(window),
           focus = d3.select('.focus').node();
 
+      // For performance, store and recalculate the current
+      // transformation matrix only when the window is resized.
       function resize() {
         ctm = svgContainer.node().getScreenCTM();
       }
 
       w.on({'resize': resize, 'scroll': resize});
 
+      // Convert coordinates.
       function convert(x, y, inverse) {
         var point = container.createSVGPoint();
         point.x = x; point.y = y;
@@ -134,22 +146,26 @@
         return [point.x, point.y];
       }
 
+      // Get the mouse coordinates.
       function mouse() {
         var event = d3.event;
         return convert(event.clientX, event.clientY, true);
       }
 
+      // Update the SVG with the new position and zoom.
       function update(dx, dy, scale) {
         pan(dx, dy);
         zoom(scale);
         svg.attr('transform', 'matrix(' + matrix.join(' ') + ')');
       }
 
+      // Move the SVG.
       function pan(dx, dy) {
         matrix[4] += dx ? width / 2 - dx : 0;
         matrix[5] += dy ? height / 2 - dy : 0;
       }
 
+      // Zoom the SVG.
       function zoom(scale) {
         if (scale) {
           for (var i = 0, l = matrix.length; i < l; i++) {
@@ -159,12 +175,14 @@
         }
       }
 
+      // Zoom/unzoom when double clicking.
       svgContainer.on('dblclick', function () {
         var l = mouse();
         update(l[0], l[1], d3.event.shiftKey ? 0.5 : 2);
         d3.event.preventDefault();
       });
 
+      // Handle moving the map.
       svgContainer.on('mousedown', function () {
         var origin = mouse();
 
@@ -185,12 +203,14 @@
         d3.event.preventDefault();
       });
 
+      // Calculate the initial center.
       var b = bbox,
           c = [(b[2] + b[0]) / 2, (b[3] + b[1]) / 2],
           s = 1 / Math.max((b[2] - b[0]) / width, (b[3] - b[1]) / height);
 
       update(c[0], c[1], s.toFixed(1));
 
+      // Handle zooming map with an eventual center.
       handleZoom = function (dx, dy, scale) {
         if (dx && dy) {
           scale *= matrix[0];
@@ -199,6 +219,7 @@
         update(dx, dy, scale);
       };
 
+      // Handle moving the map.
       handleTranslate = function(dx, dy) {
         update(width / 2 - dx * matrix[0] / s, height / 2 - dy * matrix[0] / s);
       };
@@ -230,29 +251,32 @@
         .attr('class', 'boundaries outer')
         .attr('d', path);
 
+      // Create the zoom handler, showing the entire map properly centered.
       createZoom(world.bbox, width, height);
 
       addZoom();
       addYearSelector();
-      addIndexSelector();
+      addResourceSelector();
       addLegend();
     }
 
     // Update statistics object.
-    function setStats(index, data, color) {
-      var stat = stats[index] = {},
+    function setStats(resource, data, color) {
+      var stat = stats[resource] = {},
           countries = stat.countries = {},
-          terms = data.data.facets.country.terms,
+          facet = data.embedded.facets.country || {},
+          items = facet.data || [],
           max = 0,
-          term, count, i, l;
+          item, count, i, l;
 
-      for (var i = 0, l = terms.length; i < l; i++) {
-        term = terms[i];
-        count = term.count;
-        countries[term.term.toUpperCase()] = count;
+      for (var i = 0, l = items.length; i < l; i++) {
+        item = items[i];
+        count = item.count;
+        countries[item.value.toUpperCase()] = count;
         max = count > max ? count : max;
       }
 
+      // Calculate the scale.
       var domain = computeSteps(max, 6).filter(function (d) {
         return !isNaN(d);
       });
@@ -292,8 +316,9 @@
       return steps.reverse();
     }
 
+    // Retrieve the current stats for the displayed resource.
     function getCurrentStats() {
-      return stats[activeIndex];
+      return stats[activeResource];
     }
 
     // Update choropleth.
@@ -317,16 +342,16 @@
       spinner.spin(container.node());
 
       loader
-        .defer(d3.json, rwapi.reports(year))
-        .defer(d3.json, rwapi.jobs(year))
-        .defer(d3.json, rwapi.training(year))
-        .defer(d3.json, rwapi.disasters(year))
+        .defer(rwapi.reports, year)
+        .defer(rwapi.jobs, year)
+        .defer(rwapi.training, year)
+        .defer(rwapi.disasters, year)
 
       if (loadWorld) {
         loader
           .defer(d3.json, 'data/un.countries.mercator.topojson')
           .defer(d3.json, 'data/un.boundaries.mercator.topojson')
-          .defer(d3.json, rwapi.countries());
+          .defer(rwapi.countries);
       }
 
       loader.await(function (error, reports, jobs, training, disasters, world, boundaries, countries) {
@@ -355,9 +380,9 @@
         container = d3.select('#' + id),
         spinner = new Spinner(),
         formatter = d3.format(",.0f"),
-        indexes = ['reports', 'jobs', 'training', 'disasters'],
+        resources = ['reports', 'jobs', 'training', 'disasters'],
         stats = {},
-        activeIndex = indexes[0],
+        activeResource = resources[0],
         startingYear = 1996,
         currentYear = new Date().getUTCFullYear(),
         handleZoom, handleTranslate;

@@ -5,8 +5,8 @@
   }
 
   window.sections.intro = function (id) {
-
-    function drawGraph(index, data) {
+    // Draw a graph to display the nb of posted resource items per year.
+    function drawGraph(resource, data) {
       var width = 200,
           height = 100,
           margin = {
@@ -20,12 +20,12 @@
           .attr('class', 'group');
 
       var total = group.append('div')
-          .attr('class', 'total ' + index)
-          .html('<i class="icon-' + index + '"></i>' +
-                '<strong>' + formatter(data.total) + '</strong> ' + index);
+          .attr('class', 'total ' + resource)
+          .html('<i class="icon-' + resource + '"></i>' +
+                '<strong>' + formatter(data.total) + '</strong> ' + resource);
 
       var graph = group.append('div')
-          .attr('class', 'graph ' + index)
+          .attr('class', 'graph ' + resource)
           .style({
             'width': (width + margin.left + margin.right) + 'px',
             'height': (height + margin.top + margin.bottom) + 'px'
@@ -60,11 +60,21 @@
           .x(function(d) { return x(d.year); })
           .y(function(d) { return y(d.count); });
 
-      var years = d3.range(startingYear, currentYear + 1);
-
+      // Cumulated number of posted items per year.
+      /*var years = d3.range(startingYear, currentYear + 1);
       var count = 0;
       var values = years.map(function (year) {
         count += data.data[year] || 0;
+        return {
+          year: year,
+          count: count
+        }
+      });*/
+
+      // Number of posted items per year.
+      var years = d3.range(startingYear, currentYear);
+      var values = years.map(function (year) {
+        var count = data.data[year] || 0;
         return {
           year: year,
           count: count
@@ -115,9 +125,9 @@
           })
           .text("# Posted");
 
-      var index = svg.append("path")
+      svg.append("path")
           .datum(values)
-          .attr("class", "line " + index)
+          .attr("class", "line " + resource)
           .attr("d", line);
     }
 
@@ -148,8 +158,7 @@
         currentYear = new Date().getUTCFullYear(),
         width = 500,
         height = 200,
-        formatter = d3.format(",.0f"),
-        indexes = ['reports', 'jobs', 'training', 'disasters'];
+        formatter = d3.format(",.0f");
 
     return {
       load: function () {

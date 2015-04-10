@@ -5,90 +5,8 @@
   }
 
   window.sections.details = function (id) {
-    var categories = ['theme', 'disaster_type', 'vulnerable_groups', 'source.type'],
-        startingYear = 1996,
-        currentYear = new Date().getUTCFullYear(),
-        year, from, to, category, i, l, facets = [];
-
-    for (i = 0, l = categories.length; i < l; i++) {
-      category = categories[i];
-
-      for (year = 1996; year < currentYear; year++) {
-        from = Date.UTC(year, 0, 1, 0, 0, 0, 0);
-        to = Date.UTC(year + 1, 0, 1, 0, 0, 0, 0);
-
-        facets.push({
-          field: category + '.name.exact',
-          name: category + '-' + year,
-          limit: 30,
-          filter: {
-            field: 'date',
-            value: {
-              from: from,
-              to: to
-            }
-          }
-        });
-      }
-    }
-
-    var params = {
-      limit: 0,
-      nodefault: true,
-      filter: {
-        field: 'status',
-        value: ['to-review', 'published'],
-        operator: 'OR'
-      },
-      facets: facets
-    }
-
-    var url = 'http://v0.api.rwlabs.org/v0/report/list';
-
-    d3.xhr(url).post(JSON.stringify(params), function(error, xhr) {
-      var data = JSON.parse(xhr.responseText);
-
-      // Parse data.
-      var facets = data.data.facets,
-          category, term, name, count, i, j, l, m,
-          dataset, datasets = {};
-
-      for (i = 0, l = categories.length; i < l; i++) {
-        category = categories[i];
-        dataset = datasets[category] = {max: 0, totalYear: 0};
-
-        for (year = currentYear - 10; year < currentYear; year++) {
-          totalYear = 0;
-
-          if (facets[category + '-' + year]) {
-            terms = facets[category + '-' + year].terms;
-
-            for (j = 0, m = terms.length; j < m; j++) {
-              term = terms[j];
-              name = term.term;
-              count = term.count;
-              dataset[name] = dataset[name] || {name: name, total: 0, data: []};
-              dataset[name].data.push([year, count]);
-              dataset[name].total += count;
-              dataset.max = count > dataset.max ? count : dataset.max;
-              totalYear += count;
-            }
-          }
-
-          dataset.totalYear = totalYear > dataset.totalYear ? totalYear : dataset.totalYear;
-        }
-      }
-
-      for (property in datasets) {
-        if (datasets.hasOwnProperty(property)) {
-          drawData(property, datasets[property]);
-          drawBarChart(property, datasets[property]);
-        }
-      }
-    });
-
-
-    function drawData(property, dataset) {
+    // Draw the bubble chart.
+    function drawBubbleChart(property, dataset) {
       var margin = {
             top: 20,
             right: 220,
@@ -206,6 +124,7 @@
       }
     }
 
+    // Create the date slider for the bar chart.
     function createSlider(container, width, domain, callback) {
       var height = 60;
       var xScale = d3.scale.linear()
@@ -267,6 +186,7 @@
       }
     }
 
+    // Draw an horizontal bar chart.
     function drawBarChart(property, dataset) {
       var width = 320,
           barHeight = 20;
@@ -370,29 +290,97 @@
           .call(xAxis);
     }
 
+    // Truncate a string and an a suffix like ellipsis if provided.
     function truncate(str, maxLength, suffix) {
       if (str.length > maxLength) {
         str = str.substring(0, maxLength + 1);
         str = str.substring(0, Math.min(str.length, str.lastIndexOf(' ')));
-        str = str + suffix;
+        str = str + (suffix || '');
       }
       return str;
     }
 
+    // Handle mouse over the bubbles.
     function mouseover(p) {
       var g = d3.select(this);
       g.selectAll('circle').style('display', 'none');
       g.selectAll('text.value').style('display', 'block');
     }
 
+    // Handle mouse out the bubbles.
     function mouseout(p) {
       var g = d3.select(this);
       g.selectAll('circle').style('display', 'block');
       g.selectAll('text.value').style('display', 'none');
     }
 
+    // Process the data from the API for the given resource.
+    function processData(resource, data) {
+      // Parse data.
+      var facets = data.embedded.facets,
+          category, terms, term, name, count, i, j, l, m,
+          dataset, datasets = {};
+
+      for (i = 0, l = categories.length; i < l; i++) {
+        category = categories[i];
+        dataset = datasets[category] = {max: 0, totalYear: 0};
+
+        // TODO: display more than 10 years.
+        for (year = currentYear - 10; year < currentYear; year++) {
+          totalYear = 0;
+
+          if (facets[category + '-' + year]) {
+            terms = facets[category + '-' + year].data;
+
+            for (j = 0, m = terms.length; j < m; j++) {
+              term = terms[j];
+              name = term.value;
+              count = term.count;
+              dataset[name] = dataset[name] || {name: name, total: 0, data: []};
+              dataset[name].data.push([year, count]);
+              dataset[name].total += count;
+              dataset.max = count > dataset.max ? count : dataset.max;
+              totalYear += count;
+            }
+          }
+
+          dataset.totalYear = totalYear > dataset.totalYear ? totalYear : dataset.totalYear;
+        }
+      }
+
+      for (property in datasets) {
+        if (datasets.hasOwnProperty(property)) {
+          drawBubbleChart(property, datasets[property]);
+          drawBarChart(property, datasets[property]);
+        }
+      }
+    }
+
+    // Load the statistics from the API.
+    function loadData() {
+      var loader = queue();
+
+      spinner.spin(container.node());
+
+      loader
+        .defer(rwapi.statsByYears, 'reports', categories);
+
+      loader.await(function (error, reports) {
+        spinner.stop();
+
+        processData('reports', reports);
+      });
+    }
+
+    var categories = ['theme', 'disaster_type', 'vulnerable_groups', 'source.type'],
+        startingYear = 1996,
+        currentYear = new Date().getUTCFullYear(),
+        spinner = new Spinner(),
+        container = d3.select('#' + id);
+
     return {
       load: function () {
+        loadData();
       }
     }
   };

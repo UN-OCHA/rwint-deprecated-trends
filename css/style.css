@@ -468,7 +468,7 @@ h3.section-header {
   stroke: #b6b6b6;
   shape-rendering: crispEdges;
 }
-.index text {
+.resource text {
   font-size: 10px;
   font-weight: bold;
   text-transform: capitalize;
