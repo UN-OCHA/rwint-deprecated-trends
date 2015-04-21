@@ -357,6 +357,7 @@
         .attr('href', '#')
         .on('click', function () {
           exportData(sectionLabel + '-' + label, dataset);
+          d3.event.preventDefault();
         });
     }
 
