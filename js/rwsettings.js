@@ -5,6 +5,7 @@
 
     // Reports Overview Section.
     'overview-updates': {
+      label: 'Updates Overview',
       resource: 'reports',
       categories: {
         'theme': {
@@ -27,12 +28,17 @@
     },
 
     // Get section's resource.
-    getResource: function(section) {
+    getSectionLabel: function(section) {
+      return this[section] ? this[section].label || '' : '';
+    },
+
+    // Get section's resource.
+    getSectionResource: function(section) {
       return this[section] ? this[section].resource || '' : '';
     },
 
     // Get section's categories.
-    getCategories: function(section) {
+    getSectionCategories: function(section) {
       var categories = [];
 
       if (this[section] && this[section].categories) {
@@ -46,13 +52,8 @@
       return categories;
     },
 
-    // Get section's settings.
-    getSettings: function(section) {
-      return this[section] || {};
-    },
-
     // Get category's label.
-    getLabel: function(section, category) {
+    getCategoryLabel: function(section, category) {
       if (this[section] && this[section].categories && this[section].categories[category]) {
         return this[section].categories[category].label || '';
       }
@@ -60,7 +61,7 @@
     },
 
     // Get category's description.
-    getDescription: function(section, category) {
+    getCategoryDescription: function(section, category) {
       if (this[section] && this[section].categories && this[section].categories[category]) {
         return this[section].categories[category].description || '';
       }

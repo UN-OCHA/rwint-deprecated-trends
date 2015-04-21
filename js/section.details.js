@@ -36,7 +36,7 @@
       }
 
       // Export data.
-      ExportData.export('reports-overview-' + name, rows);
+      ExportData.export(name, rows);
     }
 
     // Draw the bubble chart.
@@ -72,7 +72,7 @@
 
       // Title,
       container.append('h4')
-        .html(rwsettings.getLabel(id, category) + ' - Evolution');
+        .html(rwsettings.getCategoryLabel(id, category) + ' - Evolution');
 
       var svg = container.append('svg')
         .attr('width', width + margin.left + margin.right)
@@ -280,7 +280,7 @@
 
       // Title.
       group.append('h4')
-        .html(rwsettings.getLabel(id, category) + ' - Comparison per year');
+        .html(rwsettings.getCategoryLabel(id, category) + ' - Comparison per year');
 
       createSlider(group, width, [startingYear, currentYear - 1], update);
 
@@ -352,11 +352,11 @@
     }
 
     // Create download data link.
-    function createDownloadLink(category, dataset, container) {
+    function createDownloadLink(label, dataset, container) {
       container.append('a').html('CSV')
         .attr('href', '#')
         .on('click', function () {
-          exportData(rwsettings.getLabel(id, category), dataset);
+          exportData(sectionLabel + '-' + label, dataset);
         });
     }
 
@@ -397,8 +397,8 @@
       for (var property in datasets) {
         if (datasets.hasOwnProperty(property)) {
           var dataset = datasets[property],
-              label = rwsettings.getLabel(id, property),
-              description = rwsettings.getDescription(id, property);
+              label = rwsettings.getCategoryLabel(id, property),
+              description = rwsettings.getCategoryDescription(id, property);
 
           var group = section.append('div')
             .attr('class', 'data-group')
@@ -410,7 +410,7 @@
           // Add download data link.
           var download = group.append('div').attr('class', 'export');
           download.append('span').html('Download Data: ');
-          createDownloadLink(property, dataset, download);
+          createDownloadLink(label, dataset, download);
         }
       }
     }
@@ -431,8 +431,9 @@
       });
     }
 
-    var categories = rwsettings.getCategories(id),
-        resource = rwsettings.getResource(id),
+    var categories = rwsettings.getSectionCategories(id),
+        resource = rwsettings.getSectionResource(id),
+        sectionLabel = rwsettings.getSectionLabel(id),
         startingYear = rwsettings.startingDate,
         currentYear = new Date().getUTCFullYear(),
         spinner = new Spinner(),
