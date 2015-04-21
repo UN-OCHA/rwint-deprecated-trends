@@ -5,6 +5,28 @@
   }
 
   window.sections.map = function (id) {
+    // Export data as CSV.
+    function exportData() {
+      var rows = [], country, row;
+
+      // Labels.
+      rows.push(["country", "iso3"].concat(resources));
+
+      // Country data.
+      for (var i = 0, l = countryList.length; i < l; i++) {
+        country = countryList[i];
+        row = [country.name, country.iso3];
+
+        for (var j = 0, m = resources.length; j < m; j++) {
+          var stat = stats[resources[j]];
+          row.push(stat ? stat.countries[country.iso3] || 0 : 0);
+        }
+        rows.push(row);
+      }
+
+      ExportData.export('country-overview-' + getSelectedYear(), rows);
+    }
+
     // Display the tooltip popup when hovering a country.
     function showLabel() {
       var target = d3.select(d3.event.target);
@@ -104,6 +126,25 @@
           }).join('<br/>');
 
       layerControl.select('.control.legend').html(html);
+    }
+
+    // Add Export Data link.
+    function addExport() {
+      var control = layerControl.select('.top.right').append('div')
+          .attr('class', 'control export');
+
+      control.append('h5').html('Data for ' + (currentYear - 1));
+      control.append('span').html('Download: ');
+      control.append('a').attr('href', '#').html('CSV')
+        .on('click', function () {
+          exportData();
+          d3.event.preventDefault();
+        });
+    }
+
+    // Update the Export Data control.
+    function updateExport() {
+      layerControl.select('.control.export h5').html('Data for ' + getSelectedYear());
     }
 
     // Add the zoom control.
@@ -258,6 +299,7 @@
       addYearSelector();
       addResourceSelector();
       addLegend();
+      addExport();
     }
 
     // Update statistics object.
@@ -321,6 +363,11 @@
       return stats[activeResource];
     }
 
+    // Get the currently selected year.
+    function getSelectedYear() {
+      return layerControl.select('.control.year select').node().value;
+    }
+
     // Update choropleth.
     function updateMap(transition) {
       var stat = getCurrentStats();
@@ -333,6 +380,21 @@
           });
 
       updateLegend();
+      updateExport();
+    }
+
+    // Update the country list.
+    function updateCountryList(countries) {
+      var data = countries.data;
+      for (var i = 0, l = data.length; i < l; i++) {
+        var fields = data[i].fields;
+        fields.sort = removeDiacritics(fields.name);
+        fields.iso3 = fields.iso3.toUpperCase();
+        countryList.push(fields);
+      }
+      countryList.sort(function (a, b) {
+        return a.sort < b.sort ? -1 : (a.sort > b.sort ? 1 : 0);
+      });
     }
 
     // Load the map data.
@@ -363,6 +425,10 @@
           setStats('training', training, 'Oranges');
           setStats('disasters', disasters, 'Purples');
 
+          if (countries) {
+            updateCountryList(countries);
+          }
+
           if (world) {
             drawMap(world, boundaries);
           }
@@ -370,6 +436,27 @@
           updateMap(false);
         }
       });
+    }
+
+    /***************
+     * Sort Helper *
+     ***************/
+
+    var lower_diacritics = [
+      [/[\340-\346]/g, 'a'],
+      [/[\350-\353]/g, 'e'],
+      [/[\354-\357]/g, 'i'],
+      [/[\362-\370]/g, 'o'],
+      [/[\371-\374]/g, 'u'],
+      [/[\361]/g, 'n'],
+      [/[\347]/g, 'c']
+    ];
+    function removeDiacritics(text) {
+      text = text.toLowerCase();
+      for (var i = 0, l = lower_diacritics.length; i < l; i++) {
+        text = text.replace(lower_diacritics[i][0], lower_diacritics[i][1]);
+      }
+      return text;
     }
 
     /********
@@ -382,6 +469,7 @@
         formatter = d3.format(",.0f"),
         resources = ['reports', 'jobs', 'training', 'disasters'],
         stats = {},
+        countryList = [],
         activeResource = resources[0],
         startingYear = 1996,
         currentYear = new Date().getUTCFullYear(),

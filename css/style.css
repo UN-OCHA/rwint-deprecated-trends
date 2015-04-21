@@ -66,35 +66,36 @@ h3.section-header {
   text-transform: uppercase;
 }
 
-#intro {
+/* Intro Section */
+.section.intro {
   text-align: center;
   margin-bottom: 20px;
 }
-#intro .logo {
+.section.intro .logo {
   margin-top: 40px;
 }
-#intro .logo,
-#intro .description {
+.section.intro .logo,
+.section.intro .description {
   width: 100%;
   height: 100%;
 }
-#intro .logo img {
+.section.intro .logo img {
   height: 146px;
 }
-#intro .description {
+.section.intro .description {
   font-size: 20px;
   margin: 40px 0;
 }
-#intro .group {
+.section.intro .group {
   display: inline-block;
   vertical-align: bottom;
   margin-right: 8px;
   margin-top: 8px;
 }
-#intro .group:last-child {
+.section.intro .group:last-child {
   margin-left: 0;
 }
-#intro .total {
+.section.intro .total {
   width: 232px;
   height: 40px;
   padding: 10px;
@@ -105,154 +106,181 @@ h3.section-header {
   text-align: left;
   /*text-transform: capitalize;*/
 }
-#intro .total i {
+.section.intro .total i {
   margin-right: 15px;
   margin-left: 5px;
   font-size: 24px;
 }
-#intro .total strong {
+.section.intro .total strong {
   margin-right: 15px;
   width: 80px;
   text-align: right;
   display: inline-block;
   font-size: 24px;
 }
-#intro .total.reports {
+.section.intro .total.reports {
   background: #cb181d;
 }
-#intro .total.jobs {
+.section.intro .total.jobs {
   background: #2171b5;
 }
-#intro .total.training {
+.section.intro .total.training {
   background: #fd8d3c;
 }
-#intro .total.disasters {
+.section.intro .total.disasters {
   background: #6a51a3;
 }
-#intro .graph.reports {
+.section.intro .graph.reports {
   border: 1px solid #cb181d;
 }
-#intro .graph.jobs {
+.section.intro .graph.jobs {
   border: 1px solid #2171b5;
 }
-#intro .graph.training {
+.section.intro .graph.training {
   border: 1px solid #fd8d3c;
 }
-#intro .graph.disasters {
+.section.intro .graph.disasters {
   border: 1px solid #6a51a3;
 }
-#intro .line {
+.section.intro .line {
   stroke-width: 3px;
 }
-#intro .disclaimer {
+.section.intro .disclaimer {
   font-size: 14px;
   margin: 40px 0;
   color: #666;
 }
-#intro .disclaimer a {
+.section.intro .disclaimer a {
   text-decoration: underline;
   font-weight: bold;
   color: #666;
 }
 
-#map {
+/* Map Section */
+.section.map {
   background: #e9eef9;
   width: 100%;
   height: 1px;
   padding-top: 67%;
   position: relative;
 }
-#map > div {
+.section.map > div {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
 }
-#map .layer-map {
+.section.map .layer-map {
   height: 100%;
 }
-#map .country {
+.section.map .country {
   stroke: none;
 }
-#map .boundaries {
+.section.map .boundaries {
   stroke: #333;
   fill: none;
   stroke-width: 0.2;
   vector-effect: non-scaling-stroke;
 }
-#map .boundaries.dashed {
+.section.map .boundaries.dashed {
   stroke-dasharray: 2,2;
 }
-#map .boundaries.dotted {
+.section.map .boundaries.dotted {
   stroke-dasharray: 1;
 }
 
-
-#details h4 {
+/* Details Sections */
+.section.details .data-group {
+  padding: 20px;
+  border-bottom: 1px solid #ccc;
+}
+.section.details .data-group:last-child {
+  border-bottom: none;
+}
+.section.details h3 {
+  text-align: center;
+  font-size: 22px;
+}
+.section.details .data-group > p {
+  font-size: 14px;
+  line-height: 20px;
+  color: #666;
+  margin-bottom: 50px;
+}
+.section.details .data-group > p a {
+  font-size: inherit;
+  color: inherit;
+}
+.section.details .export {
+  margin-top: 25px;
+  font-size: 12px;
+  color: #666;
+}
+.section.details .export a {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  font-weight: bold;
+}
+.section.details h4 {
   text-transform: capitalize;
-  margin-left: 25px;
   font-size: 16px;
 }
-#details h4 em {
+.section.details h4 em {
   text-transform: lowercase;
   font-size: 12px;
 }
-#details .group {
+.section.details .group {
   position: relative;
+  text-align: center;
 }
-#details .group.circle {
-  clear: both;
-  width: 550px;
-  float: left;
+.section.details .group.circle {
 }
-#details .group.chart {
-  float: right;
+.section.details .group.chart {
 }
-#details .chart text.category {
+.section.details .chart text.category {
   text-anchor: end;
   font-size: 11px;
   font-weight: bold;
 }
-#details .chart text.number {
+.section.details .chart text.number {
   font: 10px sans-serif;
   text-anchor: start;
   fill: #555;
 }
-#details .axis text {
+.section.details .axis text {
   font: 10px sans-serif;
   fill: #999;
 }
-#details .axis path,
-#details .axis line {
+.section.details .axis path,
+.section.details .axis line {
   fill: none;
   stroke: #999;
   shape-rendering: crispEdges;
 }
-#details .slider-container {
-  position: absolute;
-  right: 15px;
-  top: 40px;
+.section.details .slider-container {
+  margin-left: 184px;
 }
-#details .slider-axis {
+.section.details .slider-axis {
   font: 10px sans-serif;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
 }
-#details .slider-axis .domain {
+.section.details .slider-axis .domain {
   fill: none;
   stroke: #000;
   stroke-opacity: .3;
   stroke-width: 10px;
   stroke-linecap: round;
 }
-#details .slider-axis .halo {
+.section.details .slider-axis .halo {
   fill: none;
   stroke: #ddd;
   stroke-width: 8px;
   stroke-linecap: round;
 }
-#details .slider .handle {
+.section.details .slider .handle {
   fill: #fff;
   stroke: #000;
   stroke-opacity: .5;
@@ -390,6 +418,25 @@ h3.section-header {
   margin-right: 8px;
   opacity: 1.0;
 }
+.control.export {
+  padding: 5px;
+  font-size: 12px;
+  line-height: 14px;
+  color: #555;
+  width: 100px;
+}
+.control.export h5 {
+  font-family: inherit;
+  margin: 0;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+.control.export a {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  font-weight: bold;
+}
 
 /**
  * Labels.
@@ -446,16 +493,16 @@ h3.section-header {
   cursor: pointer;
 }
 
-#map .icon-reports {
+.section.map .icon-reports {
   color: #cb181d;
 }
-#map .icon-jobs {
+.section.map .icon-jobs {
   color:  #2171b5;
 }
-#map .icon-training {
+.section.map .icon-training {
   color: #fd8d3c;
 }
-#map .icon-disasters {
+.section.map .icon-disasters {
   color: #6a51a3;
 }
 

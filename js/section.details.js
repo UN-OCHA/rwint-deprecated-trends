@@ -5,20 +5,53 @@
   }
 
   window.sections.details = function (id) {
+    // Export Data as CSV.
+    function exportData(name, dataset) {
+      var rows = [], row, item, data, values,
+          years = d3.range(startingYear, currentYear);
+
+      // Column labels.
+      rows.push(['term'].concat(years).concat('total'));
+
+      // Data rows.
+      for (var property in dataset) {
+        if (dataset.hasOwnProperty(property) && property !== 'max' && property !== 'totalYear') {
+          row = [];
+          item = dataset[property];
+          data = item.data;
+          values = {};
+
+          row.push(item.name);
+          for (var i = 0, l = data.length; i < l; i++) {
+            if (data[i]) {
+              values[data[i][0]] = data[i][1];
+            }
+          }
+          for (var i = 0, l = years.length; i < l; i++) {
+            row.push(values[years[i]] || 0);
+          }
+          row.push(item.total);
+          rows.push(row);
+        }
+      }
+
+      // Export data.
+      ExportData.export('reports-overview-' + name, rows);
+    }
+
     // Draw the bubble chart.
-    function drawBubbleChart(property, dataset) {
+    function drawBubbleChart(category, dataset, parent) {
       var margin = {
             top: 20,
             right: 220,
             bottom: 0,
             left: 20
           },
-        width = 300,
-        offset = 20;
+          offset = 20,
+          width = 30 * (currentYear - startingYear),
+          height = d3.keys(dataset).length * offset;
 
-      height = d3.keys(dataset).length * offset;
-
-      var startYear = currentYear - 10,
+      var startYear = startingYear,
           endYear = currentYear - 1;
 
       var c = d3.scale.category20c();
@@ -34,10 +67,12 @@
 
       var item, j = 0;
 
-      var container = d3.select('#' + id).append('div')
-          .attr('class', 'group circle');
+      var container = parent.append('div')
+        .attr('class', 'group circle');
 
-      container.append('h4').html(property.replace(/[_\.]/g, ' ').replace(/s*$/, 's') + ' <em>(past 10 years)</em>');
+      // Title,
+      container.append('h4')
+        .html(rwsettings.getLabel(id, category) + ' - Evolution');
 
       var svg = container.append('svg')
         .attr('width', width + margin.left + margin.right)
@@ -58,7 +93,7 @@
         return stepMax;
       }
 
-      for (property in dataset) {
+      for (var property in dataset) {
         if (dataset.hasOwnProperty(property) && property !== 'max' && property !== 'totalYear') {
           item = dataset[property];
 
@@ -126,7 +161,7 @@
 
     // Create the date slider for the bar chart.
     function createSlider(container, width, domain, callback) {
-      var height = 60;
+      var height = 40;
       var xScale = d3.scale.linear()
         .domain(domain)
         .range([0, width])
@@ -187,12 +222,13 @@
     }
 
     // Draw an horizontal bar chart.
-    function drawBarChart(property, dataset) {
-      var width = 320,
+    function drawBarChart(category, dataset, parent) {
+      var width = 30 * (currentYear - startingYear),
           barHeight = 20;
 
       var years = d3.range(startingYear, currentYear);
 
+      // Transform the data.
       var data = d3.keys(dataset).filter(function (k) {
         return k !== 'max' && k !== 'totalYear';
       }).map(function (k) {
@@ -239,13 +275,14 @@
             .text(function(d) { return d.data[year] || 0; });
       }
 
-      var group = d3.select('#' + id).append('div')
-          .attr('class', 'group chart');
+      var group = parent.append('div')
+        .attr('class', 'group chart');
 
-      var title = group.append('h4')
-          .html(property.replace(/[_\.]/g, ' ').replace(/s*$/, 's') + ' <em>(per year)</em>');
+      // Title.
+      group.append('h4')
+        .html(rwsettings.getLabel(id, category) + ' - Comparison per year');
 
-      createSlider(group, width, [currentYear - 10, currentYear - 1], update);
+      createSlider(group, width, [startingYear, currentYear - 1], update);
 
       var year = currentYear - 1;
 
@@ -255,7 +292,7 @@
             'height': barHeight * data.length + 50
           })
         .append('g')
-          .attr('transform', 'translate(0,' + 31 + ')');
+          .attr('transform', 'translate(0,' + 11 + ')');
 
       var bar = chart.selectAll("g")
           .data(data)
@@ -314,6 +351,15 @@
       g.selectAll('text.value').style('display', 'none');
     }
 
+    // Create download data link.
+    function createDownloadLink(category, dataset, container) {
+      container.append('a').html('CSV')
+        .attr('href', '#')
+        .on('click', function () {
+          exportData(rwsettings.getLabel(id, category), dataset);
+        });
+    }
+
     // Process the data from the API for the given resource.
     function processData(resource, data) {
       // Parse data.
@@ -326,7 +372,7 @@
         dataset = datasets[category] = {max: 0, totalYear: 0};
 
         // TODO: display more than 10 years.
-        for (year = currentYear - 10; year < currentYear; year++) {
+        for (year = startingYear; year < currentYear; year++) {
           totalYear = 0;
 
           if (facets[category + '-' + year]) {
@@ -348,10 +394,23 @@
         }
       }
 
-      for (property in datasets) {
+      for (var property in datasets) {
         if (datasets.hasOwnProperty(property)) {
-          drawBubbleChart(property, datasets[property]);
-          drawBarChart(property, datasets[property]);
+          var dataset = datasets[property],
+              label = rwsettings.getLabel(id, property),
+              description = rwsettings.getDescription(id, property);
+
+          var group = section.append('div')
+            .attr('class', 'data-group')
+            .html('<h3>' + label  + '</h3><p>' + description + '</p>');
+
+          drawBubbleChart(property, dataset, group);
+          drawBarChart(property, dataset, group);
+
+          // Add download data link.
+          var download = group.append('div').attr('class', 'export');
+          download.append('span').html('Download Data: ');
+          createDownloadLink(property, dataset, download);
         }
       }
     }
@@ -360,23 +419,24 @@
     function loadData() {
       var loader = queue();
 
-      spinner.spin(container.node());
+      spinner.spin(section.node());
 
       loader
-        .defer(rwapi.statsByYears, 'reports', categories);
+        .defer(rwapi.statsByYears, resource, categories);
 
-      loader.await(function (error, reports) {
+      loader.await(function (error, data) {
         spinner.stop();
 
-        processData('reports', reports);
+        processData(resource, data);
       });
     }
 
-    var categories = ['theme', 'disaster_type', 'vulnerable_groups', 'source.type'],
-        startingYear = 1996,
+    var categories = rwsettings.getCategories(id),
+        resource = rwsettings.getResource(id),
+        startingYear = rwsettings.startingDate,
         currentYear = new Date().getUTCFullYear(),
         spinner = new Spinner(),
-        container = d3.select('#' + id);
+        section = d3.select('#' + id);
 
     return {
       load: function () {

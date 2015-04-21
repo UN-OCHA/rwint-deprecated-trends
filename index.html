@@ -19,7 +19,7 @@
 </script>
 
 <!-- Sections -->
-<div id="intro" class="section">
+<div id="intro" class="section intro">
     <div class="logo"><img src="/css/images/logo-labs-content-trends.png" /></div>
     <div class="description">
         <p><strong>Informing humanitarians worldwide.</strong></p>
@@ -32,10 +32,10 @@
 </div>
 
 <h3 class="section-header">Country overview</h3>
-<div id="map" class="section"></div>
+<div id="map" class="section map"></div>
 
-<h3 class="section-header">Global overview</h3>
-<div id="details" class="section"></div>
+<h3 class="section-header">Updates overview</h3>
+<div id="overview-updates" class="section details"></div>
 
 <!-- Libraries -->
 <script src="/js/libraries/simple_statistics.js"></script>
@@ -44,8 +44,12 @@
 <script src="/js/libraries/topojson.v1.min.js"></script>
 <script src="/js/libraries/queue.v1.min.js"></script>
 <script src="/js/libraries/colorbrewer.js"></script>
+<script src="/js/libraries/Blob.js"></script>
+<script src="/js/libraries/FileSaver.min.js"></script>
 
 <!-- Application -->
+<script src="/js/export.js"></script>
+<script src="/js/rwsettings.js"></script>
 <script src="/js/rwapi.js"></script>
 <script src="/js/section.intro.js"></script>
 <script src="/js/section.map.js"></script>
@@ -54,7 +58,7 @@
 (function () {
   sections.intro('intro').load();
   sections.map('map').load();
-  sections.details('details').load();
+  sections.details('overview-updates').load();
 })();
 </script>
 
