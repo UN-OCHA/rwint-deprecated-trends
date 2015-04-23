@@ -43,9 +43,9 @@
     function drawBubbleChart(category, dataset, parent) {
       var margin = {
             top: 20,
-            right: 220,
+            right: 40,
             bottom: 0,
-            left: 20
+            left: 200
           },
           offset = 20,
           width = 30 * (currentYear - startingYear),
@@ -77,7 +77,7 @@
       var svg = container.append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
-        .style('margin-left', margin.left + 'px')
+        //.style('margin-left', margin.left + 'px')
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
@@ -147,9 +147,10 @@
 
           g.append('text')
             .attr('y', j * offset + 25)
-            .attr('x', width + 30)
-            .attr('class', 'label')
-            .text(truncate(item.name, 50, '...'))
+            .attr('x', -12)
+            .attr('class', 'category')
+            //.text(truncate(item.name, 50, '...'))
+            .text(item.name)
             .style('fill', function (d) {
               return c(j);
             });
@@ -223,7 +224,13 @@
 
     // Draw an horizontal bar chart.
     function drawBarChart(category, dataset, parent) {
-      var width = 30 * (currentYear - startingYear),
+      var margin = {
+            top: 50,
+            right: 40,
+            bottom: 0,
+            left: 200
+          },
+          width = 30 * (currentYear - startingYear),
           barHeight = 20;
 
       var years = d3.range(startingYear, currentYear);
@@ -288,8 +295,8 @@
 
       var chart = group.append('svg')
           .attr({
-            'width': width + 200 + 40,
-            'height': barHeight * data.length + 50
+            'width': width + margin.left + margin.right,
+            'height': barHeight * data.length + margin.top
           })
         .append('g')
           .attr('transform', 'translate(0,' + 11 + ')');
@@ -298,7 +305,7 @@
           .data(data)
         .enter().append("g")
           .attr('class', 'bar')
-          .attr("transform", function(d, i) { return "translate(" + 200 + "," + i * barHeight + ")"; });
+          .attr("transform", function(d, i) { return "translate(" + margin.left + "," + i * barHeight + ")"; });
 
       bar.append("rect")
           .attr("width", function(d) { return x(d.data[year] || 0); })
@@ -315,7 +322,7 @@
 
       bar.append("text")
           .attr('class', 'category')
-          .attr("x", -6)
+          .attr("x", -12)
           .attr("y", barHeight / 2)
           .attr("dy", ".35em")
           .attr('fill', function (d, i) { return c(i); })
