@@ -13,7 +13,7 @@
           description: 'Number of reports tagged with a theme according to the ReliefWeb taxonomy. Some themes, such as Gender, Climate Change or Humanitarian Financing were added to the ReliefWeb taxonomy in 2011. While some reports have been tagged retrospectively, trends are more reliable from 2011 onwards. The figures do not indicate the total number of reports published by ReliefWeb since a report can be tagged with multiple themes. For a description of the ReliefWeb themes please see: <a href="http://reliefweb.int/book/taxonomy-descriptions#theme">Taxonomy description - Themes</a>.'
         },
         'disaster_type': {
-          label: 'Disater Types',
+          label: 'Disaster Types',
           description: 'Number of reports tagged with a disaster type according to RW taxonomy. The numbers do not indicate the total number of reports published by ReliefWeb since one report can be tagged with multiple disaster types. For a description of the ReliefWeb disaster types please see: <a href="http://reliefweb.int/book/taxonomy-descriptions#disastertype">Taxonomy description - Disaster Types</a>'
         },
         'vulnerable_groups': {
