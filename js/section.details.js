@@ -289,7 +289,10 @@
       group.append('h4')
         .html(rwsettings.getCategoryLabel(id, category) + ' - Comparison per year');
 
-      createSlider(group, width, [startingYear, currentYear - 1], update);
+      var slider = group.append('div')
+        .attr('class', 'slider');
+
+      createSlider(slider, width, [startingYear, currentYear - 1], update);
 
       var year = currentYear - 1;
 
